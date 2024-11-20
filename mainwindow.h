@@ -8,6 +8,9 @@
 #include <QList>
 #include <QDateTime>
 #include <QStandardItemModel>
+#include <QString>
+#include <QSerialPort>    // Pour la communication série
+#include <QSerialPortInfo> // Pour trouver les ports série disponibles
 
 struct HistoriqueAction {
     QString action;  // Type d'action (ajout, suppression)
@@ -49,6 +52,9 @@ private slots:
        void toggleTimer();
          void updateTimer();
          void on_pushButton_statistiques_salaire_clicked();
+
+        void on_pushButton_sauvegarder_clicked();
+
 private:
     Ui::MainWindow *ui;
     employe etmp;
@@ -67,6 +73,8 @@ private:
               // Le timer pour le chronomètre
     QTime chronoStartTime;              // Temps de démarrage du chronomètre
     int chronoPauseDuration;           // Durée accumulée des pauses
+    QSerialPort *arduino;    // Port série pour l'Arduino
+    QString arduinoPortName; // Nom du port série
 
 };
 #endif // MAINWINDOW_H

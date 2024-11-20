@@ -20,6 +20,8 @@
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QBarCategoryAxis>
 #include <QPieSeries>
+#include <QSerialPort>    // Pour la communication série
+#include <QSerialPortInfo> // Pour trouver les ports série disponibles
 
 using namespace QtCharts;
 
@@ -42,7 +44,34 @@ MainWindow::MainWindow(QWidget *parent)
          historiqueModel->setHorizontalHeaderLabels({"Action", "Détails", "Date"});
          ui->tableView_historique->setModel(historiqueModel);
         connect(ui->pushButton_statistiques_salaire, &QPushButton::clicked, this, &MainWindow::on_pushButton_statistiques_salaire_clicked);
+        connect(ui->pushButton_sauvegarder, &QPushButton::clicked, this, &MainWindow::on_pushButton_sauvegarder_clicked);
+        arduino = new QSerialPort(this);
+        arduinoPortName = ""; // Initialiser avec un port vide
 
+        // Trouver le port connecté à l'Arduino
+        foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+            if (info.vendorIdentifier() == 0x2341 || info.vendorIdentifier() == 0x1A86) {
+                // Remplace les IDs si nécessaire selon ton Arduino
+                arduinoPortName = info.portName();
+            }
+        }
+
+        if (!arduinoPortName.isEmpty()) {
+            arduino->setPortName(arduinoPortName);
+            arduino->setBaudRate(QSerialPort::Baud9600);
+            arduino->setDataBits(QSerialPort::Data8);
+            arduino->setParity(QSerialPort::NoParity);
+            arduino->setStopBits(QSerialPort::OneStop);
+            arduino->setFlowControl(QSerialPort::NoFlowControl);
+
+            if (arduino->open(QIODevice::WriteOnly)) {
+                qDebug() << "Arduino connecté sur le port : " << arduinoPortName;
+            } else {
+                qDebug() << "Échec de connexion à l'Arduino.";
+            }
+        } else {
+            qDebug() << "Aucun Arduino détecté.";
+        }
 
 }
 
@@ -53,30 +82,33 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_ajouter_clicked()
 {
-//recuperer les données
-int id=ui->lineEdit_ID->text().toInt();
-QString nom=ui->lineEdit_nom->text();
-QString prenom=ui->lineEdit_prenom->text();
-int salaire=ui->lineEdit_salaire->text().toInt();
-QString poste=ui->lineEdit_poste->text();
-QDate date = QDate::fromString(ui->lineEdit_date->text(), "yyyy-MM-dd");
-employe e(id, nom, prenom, poste, salaire, date);
+    int id = ui->lineEdit_ID->text().toInt();
+    QString nom = ui->lineEdit_nom->text();
+    QString prenom = ui->lineEdit_prenom->text();
+    int salaire = ui->lineEdit_salaire->text().toInt();
+    QString poste = ui->lineEdit_poste->text();
+    QDate date = QDate::fromString(ui->lineEdit_date->text(), "yyyy-MM-dd");
 
-bool test=e.ajouter();
-if(test)
-{
-    ui->tableView->setModel(etmp.afficher());
-    QMessageBox::information(nullptr,QObject::tr("ok"),
-                             QObject::tr("ajout effectué\n" "click to exit."));
+    employe e(id, nom, prenom, poste, salaire, date);
 
- updateHistorique("Ajout", "Ajout de l'employé " + nom + " " + prenom);
+    if (e.ajouter()) {
+        ui->tableView->setModel(etmp.afficher());
+        QMessageBox::information(this, "Succès", "Employé ajouté avec succès!");
+
+        // Mise à jour de l'historique
+        updateHistorique("Ajout", "Ajout de l'employé " + nom + " " + prenom);
+
+        // Faire buzzer l'Arduino
+        if (arduino->isOpen() && arduino->isWritable()) {
+            arduino->write("buzz\n"); // Envoyer la commande série
+        } else {
+            qDebug() << "Erreur : Arduino non connecté ou non accessible.";
+        }
+    } else {
+        QMessageBox::critical(this, "Erreur", "Échec de l'ajout de l'employé.");
+    }
 }
-else {
-    QMessageBox::critical(nullptr,QObject::tr("not ok"),
-                          QObject::tr("ajout non effectué.\n""click cancel to exit"),
-                          QMessageBox::Cancel);
-}
-}
+
 void MainWindow::on_pushButton_supprimer_clicked()
 {
     int id=ui->lineEdit_ID->text().toInt();
@@ -329,4 +361,28 @@ void MainWindow::on_pushButton_statistiques_salaire_clicked() {
 
     // Associer la scène au QGraphicsView
     ui->graphicsView_salaire->setScene(scene);
+}
+
+void MainWindow::on_pushButton_sauvegarder_clicked() {
+    QString filePath = QFileDialog::getSaveFileName(this, "Sauvegarder l'historique", "", "Fichiers Texte (*.txt)");
+    if (!filePath.isEmpty()) {
+        QFile file(filePath);
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QTextStream out(&file);
+
+            // Écrire un en-tête
+            out << "Action\tDétails\tDate\n";
+            out << "------------------------------------------\n";
+
+            // Parcourir les données de l'historique et les écrire
+            for (const HistoriqueAction &action : historiqueList) {
+                out << action.action << "\t" << action.details << "\t" << action.date << "\n";
+            }
+
+            file.close();
+            QMessageBox::information(this, "Sauvegarde réussie", "L'historique a été sauvegardé avec succès dans " + filePath);
+        } else {
+            QMessageBox::critical(this, "Erreur", "Impossible d'ouvrir le fichier pour la sauvegarde.");
+        }
+    }
 }

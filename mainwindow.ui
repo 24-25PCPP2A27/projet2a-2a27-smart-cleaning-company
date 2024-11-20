@@ -380,7 +380,7 @@ QPushButton:hover {
     <property name="geometry">
      <rect>
       <x>650</x>
-      <y>740</y>
+      <y>780</y>
       <width>101</width>
       <height>41</height>
      </rect>
@@ -632,6 +632,36 @@ QPushButton:hover {
     </property>
     <property name="text">
      <string>STATIQTIQUE PAR SALAIRE</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_sauvegarder">
+    <property name="geometry">
+     <rect>
+      <x>642</x>
+      <y>707</y>
+      <width>111</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton {
+    background-color: rgb(173, 216, 230); /* Bleu clair */
+    color: rgb(255, 255, 255);  /* Texte blanc */
+    border: 2px solid rgb(70, 130, 180); /* Bordure bleu foncé */
+    border-radius: 20px; 
+    padding: 10px; 
+    transition: background-color 0.3s, color 0.3s, border 0.3s;
+}
+
+QPushButton:hover {
+    background-color: rgb(240, 248, 255); /* Bleu très clair (presque blanc) pour le survol */
+    color: black;  /* Texte noir lors du survol */
+    border: 4px solid rgb(70, 130, 180); /* Bordure bleu foncé sur survol */
+    outline: none; 
+}</string>
+    </property>
+    <property name="text">
+     <string>SAUVEGARDER</string>
     </property>
    </widget>
   </widget>
