@@ -163,7 +163,7 @@ void lacommande::on_pushButton_Stats_clicked()
 
     // Configurer l'axe Y
     QValueAxis *axisY = new QValueAxis();
-    axisY->setRange(0, stats["En cours"] + stats["livre"] + 5);  // Ajuster la portée
+    axisY->setRange(0, stats["En cours"] + stats["livre"] + 1);  // Ajuster la portée
     chart->addAxis(axisY, Qt::AlignLeft);
     series->attachAxis(axisY);
 
