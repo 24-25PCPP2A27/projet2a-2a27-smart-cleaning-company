@@ -1,4 +1,5 @@
 QT       += core gui sql widgets printsupport network
+QT += core gui serialport
 
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -21,13 +22,15 @@ SOURCES += \
     connection.cpp \
     main.cpp \
     mainwindow.cpp \
-    produit.cpp
+    produit.cpp \
+    serialcommunication.cpp
 
 HEADERS += \
     barchartwidget.h \
     connection.h \
     mainwindow.h \
-    produit.h
+    produit.h \
+    serialcommunication.h
 
 FORMS += \
     mainwindow.ui

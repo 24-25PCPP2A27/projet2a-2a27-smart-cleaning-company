@@ -37,10 +37,19 @@ bool Produit::ajouter()
     return true;
 }
 
+
 QSqlQueryModel* Produit::afficher()
 {
     QSqlQueryModel *model = new QSqlQueryModel();
     QSqlQuery query;
+
+    // Debugging: List all available tables to check if PRODUIT is available
+    QSqlQuery listTablesQuery;
+    listTablesQuery.exec("SELECT table_name FROM all_tables");
+
+    while (listTablesQuery.next()) {
+        qDebug() << "Available table: " << listTablesQuery.value(0).toString();
+    }
 
     // Prepare and execute the query to fetch all products
     query.prepare("SELECT * FROM PRODUIT");
@@ -56,6 +65,7 @@ QSqlQueryModel* Produit::afficher()
 
     return model;
 }
+
 
 bool Produit::supprimer(int id_produit)
 {

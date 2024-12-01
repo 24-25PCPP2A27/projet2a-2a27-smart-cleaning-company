@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QSqlQueryModel>
 #include "produit.h"
+#include <QSerialPort>
+#include <QSerialPortInfo>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -26,12 +28,17 @@ private slots:
     void on_sortByIdButton_clicked(); // Slot for sorting products by ID (new)
     void on_exportToCSVButton_clicked();
     void on_pushButton_showStats_clicked();
+    void on_checkStockButton_clicked();
+    void onCheckButtonClicked();
+    void initSerialPort();
+
 
 
 private:
     Ui::MainWindow *ui;
     Produit currentProduit;               // Current product being manipulated
     QSqlQueryModel *model;                // Model for displaying products
+    QSerialPort *serial;
 
     void afficher();                      // Load products into the model
 };

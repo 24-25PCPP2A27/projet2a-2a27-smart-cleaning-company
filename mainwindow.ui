@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -204,6 +204,19 @@
       </property>
       <property name="text">
        <string>export Excel</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="checkStockButton">
+      <property name="geometry">
+       <rect>
+        <x>570</x>
+        <y>470</y>
+        <width>93</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>check</string>
       </property>
      </widget>
     </widget>

@@ -2,6 +2,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "barchartwidget.h"
+#include "serialcommunication.h"
 #include <QtDebug>
 #include <QPrinter>
 #include <QPainter>
@@ -15,22 +16,43 @@
 #include <QFileInfo>
 #include <QMainWindow>
 #include <QByteArray>
-
+#include <QSqlError>
+#include <QSerialPort>
+#include <QDebug>
 
 
 
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , ui(new Ui::MainWindow),
+      serial(new QSerialPort(this))
 {
     ui->setupUi(this);
     afficher(); // Load products on startup
+
+    // Open the serial port
+    serial->setPortName("COM5");  // Set the port name (adjust COM5 if needed)
+    serial->setBaudRate(QSerialPort::Baud9600);  // Set baud rate
+    serial->setDataBits(QSerialPort::Data8);  // Set data bits
+    serial->setParity(QSerialPort::NoParity);  // Set parity
+    serial->setStopBits(QSerialPort::OneStop);  // Set stop bits
+    serial->setFlowControl(QSerialPort::NoFlowControl);  // Set flow control
+
+    // Try to open the serial port
+    if (serial->open(QIODevice::ReadWrite)) {
+        qDebug() << "Serial port opened successfully!";
+    } else {
+        qDebug() << "Failed to open serial port!";
+    }
 }
 
 MainWindow::~MainWindow()
 {
+    if (serial->isOpen()) {
+            serial->close(); }
     delete ui;
+    delete serial;
 }
 
 void MainWindow::on_pushButton_ajouter_clicked()
@@ -363,9 +385,84 @@ void MainWindow::on_pushButton_showStats_clicked() {
     ui->tabWidget->setCurrentWidget(ui->tab_5);  // Adjust the tab name accordingly
 }
 
+void MainWindow::on_checkStockButton_clicked() {
+    // Make sure the database is open
+    QSqlDatabase db = QSqlDatabase::database();
+    if (!db.isOpen()) {
+        QMessageBox::critical(this, "Database Error", "Database is not open.");
+        return;
+    }
+
+    // Execute the query to check stock levels
+    QSqlQuery query;
+    query.prepare("SELECT id_produit, quantite FROM PRODUIT WHERE quantite = 0");
+
+    if (!query.exec()) {
+        QMessageBox::warning(this, "Query Error", "Failed to execute query.");
+        qDebug() << query.lastError();
+        return;
+    }
+
+    // Process the result set
+    QString outOfStockMessage;
+    bool outOfStockFound = false;
+    while (query.next()) {
+        int id = query.value(0).toInt();  // Get the product ID
+        int quantite = query.value(1).toInt();  // Get the quantity
+
+        // If quantite is 0, add product to out of stock message
+        if (quantite == 0) {
+            outOfStockMessage += QString("Product with ID %1 is out of stock.\n").arg(id);
+            outOfStockFound = true;
+        }
+    }
+
+    // Display the message
+    if (outOfStockFound) {
+        QMessageBox::information(this, "Out of Stock", outOfStockMessage);
+
+        // Send command to Arduino to activate vibrator (e.g., "1" for ON)
+        if (serial->isOpen()) {
+            serial->write("1");  // "1" to activate vibrator
+            qDebug() << "Sent command to Arduino to activate vibrator.";
+        } else {
+            qDebug() << "Serial port is not open!";
+        }
+    } else {
+        QMessageBox::information(this, "Stock Check", "All products are in stock.");
+    }
+}
 
 
 
 
+SerialCommunication serialComm;
+
+void MainWindow::initSerialPort() {
+    serial = new QSerialPort(this);
+    serial->setPortName("COM5");  // Update this if needed
+    serial->setBaudRate(QSerialPort::Baud9600);
+    serial->setDataBits(QSerialPort::Data8);
+    serial->setParity(QSerialPort::NoParity);
+    serial->setStopBits(QSerialPort::OneStop);
+    serial->setFlowControl(QSerialPort::NoFlowControl);
+
+    if (!serial->open(QIODevice::WriteOnly)) {
+        qDebug() << "Failed to open serial port!";
+        qDebug() << "Error: " << serial->errorString();  // Additional error info
+    } else {
+        qDebug() << "Serial port opened successfully!";
+    }
+}
+
+
+
+
+void MainWindow::onCheckButtonClicked() {
+    serialComm.connectToArduino();  // Establish the connection to Arduino
+
+    // Check products and activate vibrator if necessary
+    serialComm.checkProductAndActivateVibrator();
+}
 
 
