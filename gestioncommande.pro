@@ -2,6 +2,11 @@ QT       += core gui sql charts
 QT += charts
 QT += core gui sql charts printsupport
 QT += printsupport
+QT += serialport
+QT += widgets
+QT += core gui serialport sql
+
+
 
 
 
@@ -21,12 +26,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    arduino.cpp \
     connection.cpp \
     gestcommande.cpp \
     main.cpp \
     lacommande.cpp
 
 HEADERS += \
+    arduino.h \
     connection.h \
     gestcommande.h \
     lacommande.h

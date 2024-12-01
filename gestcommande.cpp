@@ -186,4 +186,15 @@ void Commande::genererRapportPDF(QString cheminFichier)
                               QObject::tr("Le rapport n'a pas pu être généré."), QMessageBox::Cancel);
     }
 }
+QString Commande::getLastCommandStatus()
+{
+    QSqlQuery query;
+    if (query.exec("SELECT STATUE FROM COMMANDE ORDER BY ID DESC LIMIT 1")) { // Dernière commande
+        if (query.next()) {
+            return query.value(0).toString();
+        }
+    }
+    qDebug() << "Erreur SQL (Dernière commande):" << query.lastError().text();
+    return QString();
+}
 

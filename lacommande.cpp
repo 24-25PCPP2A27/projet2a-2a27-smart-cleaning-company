@@ -17,27 +17,118 @@
 #include <QFileDialog>
 #include <QComboBox>
 #include <QVBoxLayout>
+#include <QSerialPort>
+#include <QSerialPortInfo>
+#include "arduino.h"
+#include <QSqlError>     // Pour gérer les erreurs SQL
+#include <QString>       // Pour manipuler les chaînes de caractères
 
 using namespace QtCharts;
+QSerialPort *arduino;
 
-lacommande::lacommande(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::lacommande)
+lacommande::lacommande(QWidget *parent)
+    : QMainWindow(parent),
+      ui(new Ui::lacommande),
+      arduino(new Arduino) // Initialisation d'Arduino
 {
     ui->setupUi(this);
-    ui->tableView->setModel(Etmp.afficher()); // Afficher les commandes dans le tableau
-    connect(ui->pushButton_rapport, &QPushButton::clicked, this, &lacommande::genererRapport);
 
-
-
-
-
+    // Tentative de connexion à l'Arduino
+    if (arduino->connectToArduino() != 0) {
+        QMessageBox::critical(this, "Erreur", "Impossible de se connecter à l'Arduino !");
+    } else {
+        connect(arduino->getSerial(), &QSerialPort::readyRead, this, &lacommande::onArduinoDataReceived);
+        QMessageBox::information(this, "Arduino", "Connexion à l'Arduino réussie !");
+    }
+    connect(ui->pushButton_CheckEnCours, &QPushButton::clicked, this, &lacommande::sendCommandesParMotToArduino);
 }
 
 lacommande::~lacommande()
 {
+    if (arduino->getSerial()->isOpen()) {
+        arduino->disconnectFromArduino();
+    }
+    delete arduino;
     delete ui;
 }
+
+void lacommande::checkCommandesParMot()
+{
+    // Récupérer le mot depuis la ligne d'édition
+    QString searchWord = ui->lineEdit_searchWord->text();
+
+    if (searchWord.isEmpty()) {
+        QMessageBox::warning(this, "Recherche vide", "Veuillez entrer un mot à rechercher.");
+        return;
+    }
+
+    // Préparer la requête SQL pour compter les occurrences
+    QSqlQuery query;
+    query.prepare("SELECT COUNT(*) AS nombre_commandes FROM COMMANDE WHERE STATUE = :searchWord");
+    query.bindValue(":searchWord", searchWord);
+
+    if (query.exec()) {
+        if (query.next()) {
+            int nombreCommandes = query.value(0).toInt();
+            qDebug() << "Nombre de commandes pour '" << searchWord << "': " << nombreCommandes;
+
+            // Afficher le résultat dans une boîte de dialogue
+            QMessageBox::information(this, "Statistiques",
+                                     QString("Il y a %1 commandes avec le statut '%2'.")
+                                     .arg(nombreCommandes)
+                                     .arg(searchWord));
+        }
+    } else {
+        qDebug() << "Erreur lors de l'exécution de la requête SQL:" << query.lastError().text();
+        QMessageBox::critical(this, "Erreur", "Impossible de récupérer les données.");
+    }
+}
+
+void lacommande::sendCommandesParMotToArduino()
+{
+    // Récupérer le mot depuis la ligne d'édition
+    QString searchWord = ui->lineEdit_searchWord->text();
+
+    if (searchWord.isEmpty()) {
+        QMessageBox::warning(this, "Recherche vide", "Veuillez entrer un mot à rechercher.");
+        return;
+    }
+
+    // Préparer la requête SQL pour compter les occurrences
+    QSqlQuery query;
+    query.prepare("SELECT COUNT(*) AS nombre_commandes FROM COMMANDE WHERE STATUE = :searchWord");
+    query.bindValue(":searchWord", searchWord);
+
+    if (query.exec()) {
+        if (query.next()) {
+            int nombreCommandes = query.value(0).toInt();
+            QString message = QString("'%1': %2 occurrences").arg(searchWord).arg(nombreCommandes);
+
+            // Envoyer le message à l'Arduino
+            if (arduino->sendDataToArduino(message.toUtf8()) == 0) {
+                qDebug() << "Message envoyé à l'Arduino :" << message;
+                QMessageBox::information(this, "Envoyé",
+                                         QString("Message envoyé à l'Arduino :\n%1").arg(message));
+            } else {
+                qDebug() << "Échec de l'envoi du message à l'Arduino.";
+                QMessageBox::critical(this, "Erreur", "Échec de l'envoi à l'Arduino.");
+            }
+        }
+    } else {
+        qDebug() << "Erreur lors de l'exécution de la requête SQL :" << query.lastError().text();
+        QMessageBox::critical(this, "Erreur", "Impossible de récupérer les données.");
+    }
+}
+
+void lacommande::onArduinoDataReceived()
+{
+    QByteArray data = arduino->receiveDataFromArduino();
+    if (!data.isEmpty()) {
+        qDebug() << "Données reçues de l'Arduino :" << data;
+        ui->textEdit_log->append(QString("Arduino: %1").arg(QString(data)));
+    }
+}
+
 
 void lacommande::on_pushButton_ajouter_clicked()
 {
@@ -263,8 +354,38 @@ void lacommande::genererRapport()
                              QObject::tr("Le rapport a été créé avec succès :\n%1")
                              .arg(cheminRapport));
 }
+/*void lacommande::on_pushButton_SearchAndSend_clicked()
+{
+    // Récupérer le mot depuis l'interface utilisateur
+    QString searchWord = ui->lineEdit_searchWord->text();
 
+    if (searchWord.isEmpty()) {
+        QMessageBox::warning(this, "Recherche vide", "Veuillez entrer un mot à rechercher.");
+        return;
+    }
 
+    // Rechercher dans la base de données
+    QSqlQuery query;
+    query.prepare("SELECT COUNT(*) FROM COMMANDE WHERE STATUE = :searchWord");
+    query.bindValue(":searchWord", searchWord);
 
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Erreur SQL", "Échec de la recherche dans la base de données.");
+        qDebug() << "Erreur SQL:" << query.lastError().text();
+        return;
+    }
 
+    int count = 0;
+    if (query.next()) {
+        count = query.value(0).toInt();
+    }
+
+    // Envoyer le message à l'Arduino
+    QString message = QString("'%1': %2 occurrences").arg(searchWord).arg(count);
+    if (arduino->sendDataToArduino(message.toUtf8()) == 0) {
+        QMessageBox::information(this, "Envoyé", QString("Message envoyé à l'Arduino:\n%1").arg(message));
+    } else {
+        QMessageBox::critical(this, "Erreur Arduino", "Échec de l'envoi des données à l'Arduino.");
+    }
+}*/
 

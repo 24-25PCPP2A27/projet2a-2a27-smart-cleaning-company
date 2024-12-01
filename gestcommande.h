@@ -15,6 +15,10 @@ class Commande
 public:
     Commande();
     Commande(int id, QString date, QString statut, QString modePaiement);
+    QString getLastCommandStatus();
+
+
+
 
     int getID() const { return id; }
     QString getDate() const { return date; }
