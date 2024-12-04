@@ -44,8 +44,8 @@ private slots:
 
     // Chronomètre
     void updateHistorique(const QString &action, const QString &details);
-    void on_pushButton_commencer_clicked();  // Fonction pour commencer le travail
-       void on_pushButton_finJournee_clicked(); // Fonction pour marquer la fin de la journée
+    void on_pushButton_commencer_clicked();
+       void on_pushButton_finJournee_clicked();
          void on_pushButton_statistiques_salaire_clicked();
 
         void on_pushButton_sauvegarder_clicked();

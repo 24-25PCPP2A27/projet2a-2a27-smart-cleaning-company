@@ -39,9 +39,9 @@ bool employe::ajouter()
               arduino->increment_add_counter(); // Incrémente le compteur
               if (arduino->get_add_counter() >= 2) {
                   arduino->check_and_activate_buzzer();
-                  arduino->write_to_arduino("Buzzer\n"); // Envoie le signal à l'Arduino
+                  arduino->write_to_arduino("Buzzer\n");
                   qDebug() << "Limite atteinte : Buzzer activé.";
-                  arduino->reset_add_counter(); // Réinitialise le compteur après le buzz
+                  arduino->reset_add_counter();
               }
           }
           return true;
@@ -100,7 +100,7 @@ QMap<QString, int> employe::statistiquesParPoste() {
 
     if (!query.exec()) {
         qDebug() << "Erreur lors de l'exécution de la requête SQL pour les statistiques : " << query.lastError().text();
-        return stats; // Si la requête échoue, retourne une carte vide
+        return stats;
     }
 
     while (query.next()) {

@@ -34,9 +34,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     ui->tableView->setModel(etmp.afficher());
     initialiserTableView();
-    employeInstance = new employe();  // Creates a new instance of employe
+    employeInstance = new employe();
 
-     // Initialisation du modèle d'historique
+
          historiqueModel = new QStandardItemModel(this);
          historiqueModel->setHorizontalHeaderLabels({"Action", "Détails", "Date"});
          ui->tableView_historique->setModel(historiqueModel);
@@ -60,7 +60,6 @@ MainWindow::~MainWindow()
 
 
 
-// Ajout d'un employé
 void MainWindow::on_pushButton_ajouter_clicked()
 {
     if (ui->lineEdit_ID->text().isEmpty() || ui->lineEdit_nom->text().isEmpty()) {
@@ -91,7 +90,6 @@ void MainWindow::on_pushButton_ajouter_clicked()
     }
 }
 
-// Suppression d'un employé
 void MainWindow::on_pushButton_supprimer_clicked()
 {
     int id = ui->lineEdit_ID->text().toInt();
@@ -127,8 +125,8 @@ void MainWindow::on_pushButton_update_clicked() {
 
 
 void MainWindow::on_pushButton_rechercher_clicked() {
-    QString searchKey = ui->lineEdit_recherche->text(); // Assure-toi que `lineEdit_recherche` est dans `mainwindow.ui`
-    ui->tableView->setModel(etmp.rechercher(searchKey)); // Utilise la fonction rechercher
+    QString searchKey = ui->lineEdit_recherche->text();
+    ui->tableView->setModel(etmp.rechercher(searchKey));
 }
 
 
@@ -139,7 +137,7 @@ void MainWindow::on_pushButton_trier_clicked() {
 
 
 void MainWindow::on_pushButton_statistiques_clicked() {
-    // Récupérer les statistiques par poste depuis la base de données
+
     QMap<QString, int> stats = etmp.statistiquesParPoste();
 
     if (stats.isEmpty()) {
@@ -147,29 +145,24 @@ void MainWindow::on_pushButton_statistiques_clicked() {
         return;
     }
 
-    // Création d'une scène pour le QGraphicsView
+
     QGraphicsScene *scene = new QGraphicsScene(this);
 
-    // Définir les dimensions et espacement des carrés
     int squareSize = 50;
     int margin = 10;
     int x = 0, y = 0; // Position initiale
 
-    // Génération des carrés pour chaque poste
     for (auto it = stats.begin(); it != stats.end(); ++it) {
         // Couleur aléatoire pour chaque poste
         QColor color(qrand() % 256, qrand() % 256, qrand() % 256);
 
-        // Créer un carré
         QRectF rect(x, y, squareSize, squareSize);
         QGraphicsRectItem *square = scene->addRect(rect, QPen(Qt::black), QBrush(color));
 
-        // Ajouter un texte à côté du carré
         QString label = it.key() + " (" + QString::number(it.value()) + ")";
         QGraphicsTextItem *text = scene->addText(label);
         text->setPos(x, y + squareSize + 5);
 
-        // Calculer la position pour le prochain carré
         x += squareSize + margin;
         if (x + squareSize > ui->graphicsView_statistiques->width()) {
             x = 0;
@@ -177,7 +170,6 @@ void MainWindow::on_pushButton_statistiques_clicked() {
         }
     }
 
-    // Associer la scène au QGraphicsView
     ui->graphicsView_statistiques->setScene(scene);
 }
 
@@ -193,30 +185,24 @@ void MainWindow::on_pushButton_exporterPDF_clicked() {
 
         QSqlQueryModel *model = etmp.afficher();
 
-        // Loop through the rows of the model and export each row to the PDF
         for (int row = 0; row < model->rowCount(); ++row) {
             int xPos = 100;  // Start x-position for the first column
 
-            // Loop through the columns for each row to add spacing
             for (int col = 0; col < model->columnCount(); ++col) {
                 QString cellData = model->data(model->index(row, col)).toString();
 
-                // Draw each column with 600 units of horizontal space between them
                 painter.drawText(xPos, yPos, cellData);
                 xPos += 900;  // Increase x-position for the next column
             }
 
-            // Increase y-position for the next row with 300 units of vertical space
             yPos += 300;
 
-            // If the content exceeds the page height, create a new page
             if (yPos > pdfWriter.height() - 50) {
                 pdfWriter.newPage();
-                yPos = 100; // Reset y-position for the new page
+                yPos = 100;
             }
         }
 
-        // End the PDF drawing
         painter.end();
 
         QMessageBox::information(this, "Exporter PDF", "PDF exporté avec succès.");
@@ -230,15 +216,13 @@ void MainWindow::on_pushButton_exporterPDF_clicked() {
 
 
 void MainWindow::updateHistorique(const QString &action, const QString &details) {
-    // Ajouter une nouvelle action à l'historique
     HistoriqueAction historique;
     historique.action = action;
     historique.details = details;
     historique.date = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
 
-    historiqueList.append(historique);  // Ajouter à la liste des actions
+    historiqueList.append(historique);
 
-    // Ajouter à l'affichage dans le tableView
     QStandardItem *actionItem = new QStandardItem(action);
     QStandardItem *detailsItem = new QStandardItem(details);
     QStandardItem *dateItem = new QStandardItem(historique.date);
@@ -264,37 +248,30 @@ void MainWindow::on_pushButton_statistiques_salaire_clicked() {
         return;
     }
 
-    // Création de la série de diagramme circulaire
     QPieSeries *series = new QPieSeries();
     for (auto it = stats.begin(); it != stats.end(); ++it) {
         series->append(it.key() + " (" + QString::number(it.value()) + ")", it.value());
     }
 
-    // Personnaliser les tranches (facultatif)
     for (auto slice : series->slices()) {
-        slice->setLabelVisible(true); // Rendre les labels visibles
-        slice->setLabelFont(QFont("Arial", 9)); // Agrandir la taille des labels
-        slice->setExploded(true); // Exploser légèrement les tranches
+        slice->setLabelVisible(true);
+        slice->setLabelFont(QFont("Arial", 9));
+        slice->setExploded(true);
     }
 
-    // Création du graphique
     QChart *chart = new QChart();
     chart->addSeries(series);
     chart->setTitle("Statistiques des employés par salaire");
     chart->setAnimationOptions(QChart::SeriesAnimations);
 
-    // Création de la vue graphique
     QGraphicsScene *scene = new QGraphicsScene(this);
     QChartView *chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
 
-    // Ajuster la taille du QChartView
     chartView->setFixedSize(641, 441);  // Taille personnalisée du graphique
 
-    // Ajouter le QChartView à la scène
     scene->addWidget(chartView);
 
-    // Associer la scène au QGraphicsView
     ui->graphicsView_salaire->setScene(scene);
 }
 
@@ -342,7 +319,6 @@ void MainWindow::on_pushButton_commencer_clicked()
     int id = ui->lineEdit_ID->text().toInt();
     QString debutJournee = QTime::currentTime().toString("HH:mm:ss");
 
-    // Vérifier si l'ID existe dans la base de données
     if (!employeObj.idExiste(id)) {
         QMessageBox::critical(this, "Erreur", "L'ID n'existe pas dans la base de données des employés.");
         return;
@@ -368,11 +344,10 @@ void MainWindow::on_pushButton_finJournee_clicked()
     int id = ui->lineEdit_ID->text().toInt(); // Utiliser l'ID saisi
     QString finJournee = QTime::currentTime().toString("HH:mm:ss");
 
-    // Vérifier si l'ID existe déjà dans le tableau des pointages
     bool updated = false;
-    for (QVector<QString>& ligne : employeObj.pointageTable) { // Assurez-vous que `pointageTable` est accessible ici
+    for (QVector<QString>& ligne : employeObj.pointageTable) {
         if (ligne[0] == QString::number(id)) {
-            ligne[2] = finJournee; // Mettre à jour l'heure de fin
+            ligne[2] = finJournee;
             updated = true;
             break;
         }
@@ -398,9 +373,8 @@ void MainWindow::afficherPointage()
     for (const QVector<QString>& ligne : pointage) {
         int id = ligne[0].toInt();
 
-        // Vérifier si l'ID existe dans la base de données
         if (!employeObj.idExiste(id)) {
-            continue; // Ignorer les IDs non valides
+            continue;
         }
 
         QList<QStandardItem*> row;
@@ -413,7 +387,6 @@ void MainWindow::afficherPointage()
 
 
 void MainWindow::on_pushButton_enregistrer_clicked() {
-    // Let the user choose a file path for saving the PDF
     QString filePath = QFileDialog::getSaveFileName(nullptr, "Save PDF", "", "PDF Files (*.pdf)");
 
     if (!filePath.isEmpty()) {
@@ -427,7 +400,6 @@ void MainWindow::on_pushButton_enregistrer_clicked() {
     }
 }
 bool MainWindow::exporterPointagePDF(const QString& filePath) {
-    // Create a QPdfWriter instance to generate the PDF
     QPdfWriter writer(filePath);
     QPainter painter(&writer);
 
@@ -436,56 +408,46 @@ bool MainWindow::exporterPointagePDF(const QString& filePath) {
         return false;
     }
 
-    // Set font for the PDF
-    painter.setFont(QFont("Arial", 12)); // Set a larger font for readability
+    painter.setFont(QFont("Arial", 12));
 
-    // Y-position for drawing data
-    int yPosition = 100;  // Start from the top of the page
-    int xPositionID = 100;  // Start for ID column
-    int xPositionDebut = xPositionID + 1000;  // Space between columns (1000 = 300 + 700)
-    int xPositionFin = xPositionDebut + 1000;  // Space between columns (1000 = 300 + 700)
+    int yPosition = 100;
+    int xPositionID = 100;
+    int xPositionDebut = xPositionID + 1000;
+    int xPositionFin = xPositionDebut + 1000;
 
-    // Draw the header row with the same spacing
-    painter.drawText(xPositionID, yPosition, "ID");  // ID Header
-    painter.drawText(xPositionDebut, yPosition, "D.J");  // DEBUT JOURNEE Header
-    painter.drawText(xPositionFin, yPosition, "F.J");  // FIN JOURNEE Header
+    painter.drawText(xPositionID, yPosition, "ID");
+    painter.drawText(xPositionDebut, yPosition, "D.J");
+    painter.drawText(xPositionFin, yPosition, "F.J");
 
-    // Increase y-position to leave space between the header and data rows
-    yPosition += 300;  // Increased vertical space between rows
+    yPosition += 300;
 
-    // Loop through the rows of the model and export each row to the PDF
     int rowCount = ui->tableView_pointage->model()->rowCount();
     for (int row = 0; row < rowCount; ++row) {
-        QModelIndex indexID = ui->tableView_pointage->model()->index(row, 0);  // ID column
-        QModelIndex indexDebut = ui->tableView_pointage->model()->index(row, 1);  // DEBUT JOURNEE column
-        QModelIndex indexFin = ui->tableView_pointage->model()->index(row, 2);  // FIN JOURNEE column
+        QModelIndex indexID = ui->tableView_pointage->model()->index(row, 0);
+        QModelIndex indexDebut = ui->tableView_pointage->model()->index(row, 1);
+        QModelIndex indexFin = ui->tableView_pointage->model()->index(row, 2);
 
         QString id = ui->tableView_pointage->model()->data(indexID).toString();
         QString debutJournee = ui->tableView_pointage->model()->data(indexDebut).toString();
         QString finJournee = ui->tableView_pointage->model()->data(indexFin).toString();
 
-        // Draw each row of data with added horizontal and vertical spacing
-        painter.drawText(xPositionID, yPosition, id);  // ID
-        painter.drawText(xPositionDebut, yPosition, debutJournee);  // DEBUT JOURNEE
-        painter.drawText(xPositionFin, yPosition, finJournee);  // FIN JOURNEE
+        painter.drawText(xPositionID, yPosition, id);
+        painter.drawText(xPositionDebut, yPosition, debutJournee);
+        painter.drawText(xPositionFin, yPosition, finJournee);
 
-        // Increase y-position to move to the next line with more space between rows
-        yPosition += 300;  // Increased vertical space between rows
+        yPosition += 300;
 
-        // If the yPosition exceeds the page height, create a new page
         if (yPosition > writer.height() - 50) {
             writer.newPage();
-            yPosition = 100; // Reset yPosition for the new page
+            yPosition = 100;
         }
     }
 
-    // End the PDF drawing
     painter.end();
 
-    return true;  // Indicate success
+    return true;
 }
 void MainWindow::on_pushButton_employe_clicked() {
-    // Make sure the current window (if it's any other window) is hidden
     this->show();  // Show the MainWindow again (if it was hidden)
 }
 //For example, if you have a different window, make sure to hide it before bringing MainWindow back:

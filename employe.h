@@ -48,17 +48,17 @@ public:
        QSqlQueryModel* trierParSalaire();
        bool ajouterPointage(int id, const QString& debutJournee, const QString& finJournee);
            QVector<QVector<QString>> getPointage() const;
-           bool idExiste(int id); // Vérifie si un ID existe dans la base de données
-           QVector<QVector<QString>> getPointageTable() const; // Accès à pointageTable
-               QVector<QVector<QString>>& getPointageTableRef();         // Getters et setters
+           bool idExiste(int id);
+           QVector<QVector<QString>> getPointageTable() const;
+               QVector<QVector<QString>>& getPointageTableRef();
 
-        void verifierEtActiverBuzzer(); // Méthode pour gérer le buzzer
+        void verifierEtActiverBuzzer();
 
 
         employe(Arduino* arduinoInstance): arduino(arduinoInstance){}
-        QVector<QVector<QString>> pointageTable; // Tableau des pointages
+        QVector<QVector<QString>> pointageTable;
           bool exporterPointagePDF(const QString& cheminFichier);
-          QVector<QVector<QString>> getPointageData(); // Add this method to your class
+          QVector<QVector<QString>> getPointageData();
      void on_pushButton_enregistrer_clicked();
 };
 
