@@ -500,14 +500,17 @@ domestique</string>
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Prix converti :&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
-     <widget class="QGraphicsView" name="statistiquesWidget">
+     <widget class="QTableView" name="statistiquesWidget">
       <property name="geometry">
        <rect>
-        <x>1130</x>
+        <x>1110</x>
         <y>120</y>
-        <width>421</width>
-        <height>401</height>
+        <width>491</width>
+        <height>421</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(255, 255, 255);</string>
       </property>
      </widget>
      <zorder>label</zorder>

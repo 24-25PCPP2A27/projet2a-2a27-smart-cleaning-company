@@ -37,14 +37,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-    arduino.cpp \
         main.cpp \
         mainwindow.cpp \
     connection.cpp \
     services.cpp
 
 HEADERS += \
-    arduino.h \
         mainwindow.h \
     connection.h \
     services.h

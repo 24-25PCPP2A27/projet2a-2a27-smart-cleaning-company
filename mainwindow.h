@@ -30,15 +30,15 @@ private slots:
     void exportDataToPDF();
     void on_remiseButton_clicked();
     void on_convertirButton_clicked();
-    void handleArduinoSignal(int boutonId);  // Slot pour gérer le signal de l'Arduino
+
 
 
 private:
     Ui::MainWindow *ui;
     Services service;
     QPushButton *statistiquesButton;
-    void updateProductQuantity(int produitId);  // Cette fonction est déjà définie
-    Arduino *arduino;  // Objet Arduino pour la gestion de la communication avec l'Arduino
+
+
 };
 
 #endif // MAINWINDOW_H
