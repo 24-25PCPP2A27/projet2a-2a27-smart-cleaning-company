@@ -29,65 +29,51 @@ using namespace QtCharts;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+
 {
     ui->setupUi(this);
     ui->tableView->setModel(etmp.afficher());
-    chronoTimer = new QTimer(this);
-    timeElapsed = 0;
-    isTimerRunning = false;
-       chronoTimer = new QTimer(this);
-    connect(chronoTimer,&QTimer::timeout, this, &MainWindow::updateTimer);
-     ui->lcdNumber_chrono->display("00:00:00");
-     connect(ui->pushButton_chrono, &QPushButton::clicked, this, &MainWindow::toggleTimer);
+    initialiserTableView();
+    employeInstance = new employe();  // Creates a new instance of employe
+
      // Initialisation du modèle d'historique
          historiqueModel = new QStandardItemModel(this);
          historiqueModel->setHorizontalHeaderLabels({"Action", "Détails", "Date"});
          ui->tableView_historique->setModel(historiqueModel);
         connect(ui->pushButton_statistiques_salaire, &QPushButton::clicked, this, &MainWindow::on_pushButton_statistiques_salaire_clicked);
         connect(ui->pushButton_sauvegarder, &QPushButton::clicked, this, &MainWindow::on_pushButton_sauvegarder_clicked);
-        arduino = new QSerialPort(this);
-        arduinoPortName = ""; // Initialiser avec un port vide
+        connect(ui->pushButton_exporterPDF, &QPushButton::clicked, this, &MainWindow::on_pushButton_exporterPDF_clicked); // Connecter le bouton d'export PDF
+        connect(ui->pushButton_enregistrer, &QPushButton::clicked, this, &MainWindow::on_pushButton_enregistrer_clicked);
+        connect(ui->pushButton_employe, &QPushButton::clicked, this, &MainWindow::on_pushButton_employe_clicked);
 
-        // Trouver le port connecté à l'Arduino
-        foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
-            if (info.vendorIdentifier() == 0x2341 || info.vendorIdentifier() == 0x1A86) {
-                // Remplace les IDs si nécessaire selon ton Arduino
-                arduinoPortName = info.portName();
-            }
-        }
 
-        if (!arduinoPortName.isEmpty()) {
-            arduino->setPortName(arduinoPortName);
-            arduino->setBaudRate(QSerialPort::Baud9600);
-            arduino->setDataBits(QSerialPort::Data8);
-            arduino->setParity(QSerialPort::NoParity);
-            arduino->setStopBits(QSerialPort::OneStop);
-            arduino->setFlowControl(QSerialPort::NoFlowControl);
-
-            if (arduino->open(QIODevice::WriteOnly)) {
-                qDebug() << "Arduino connecté sur le port : " << arduinoPortName;
-            } else {
-                qDebug() << "Échec de connexion à l'Arduino.";
-            }
-        } else {
-            qDebug() << "Aucun Arduino détecté.";
-        }
 
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-}
+     delete employeInstance;
 
+      }
+
+
+
+
+// Ajout d'un employé
 void MainWindow::on_pushButton_ajouter_clicked()
 {
+    if (ui->lineEdit_ID->text().isEmpty() || ui->lineEdit_nom->text().isEmpty()) {
+        QMessageBox::warning(this, "Erreur", "Veuillez remplir tous les champs.");
+        return;
+    }
+
     int id = ui->lineEdit_ID->text().toInt();
     QString nom = ui->lineEdit_nom->text();
     QString prenom = ui->lineEdit_prenom->text();
     int salaire = ui->lineEdit_salaire->text().toInt();
     QString poste = ui->lineEdit_poste->text();
-    QDate date = QDate::fromString(ui->lineEdit_date->text(), "yyyy-MM-dd");
+    QDate date = QDate::fromString(ui->dateEdit_date->text(), "dd-MM-yyyy");
 
     employe e(id, nom, prenom, poste, salaire, date);
 
@@ -99,34 +85,23 @@ void MainWindow::on_pushButton_ajouter_clicked()
         updateHistorique("Ajout", "Ajout de l'employé " + nom + " " + prenom);
 
         // Faire buzzer l'Arduino
-        if (arduino->isOpen() && arduino->isWritable()) {
-            arduino->write("buzz\n"); // Envoyer la commande série
-        } else {
-            qDebug() << "Erreur : Arduino non connecté ou non accessible.";
-        }
+
     } else {
         QMessageBox::critical(this, "Erreur", "Échec de l'ajout de l'employé.");
     }
 }
 
+// Suppression d'un employé
 void MainWindow::on_pushButton_supprimer_clicked()
 {
-    int id=ui->lineEdit_ID->text().toInt();
-    bool test=etmp.supprimer(id);
-    if(test)
-    {
+    int id = ui->lineEdit_ID->text().toInt();
+    if (etmp.supprimer(id)) {
         ui->tableView->setModel(etmp.afficher());
-        QMessageBox::information(nullptr,QObject::tr("ok"),
-                                 QObject::tr("ajout effectué\n" "click to exit."));
-
- updateHistorique("Suppression", "Suppression de l'employé avec ID: " + QString::number(id));
+        QMessageBox::information(this, "Succès", "Employé supprimé avec succès.");
+        updateHistorique("Suppression", "Suppression de l'employé avec ID: " + QString::number(id));
+    } else {
+        QMessageBox::critical(this, "Erreur", "Échec de la suppression de l'employé.");
     }
-    else {
-        QMessageBox::critical(nullptr,QObject::tr("not ok"),
-                              QObject::tr("ajout non effectué.\n""click cancel to exit"),
-                              QMessageBox::Cancel);
-
-}
 }
 
 void MainWindow::on_pushButton_update_clicked() {
@@ -135,7 +110,7 @@ void MainWindow::on_pushButton_update_clicked() {
     QString prenom = ui->lineEdit_prenom->text();
     int salaire = ui->lineEdit_salaire->text().toInt();
     QString poste = ui->lineEdit_poste->text();
-    QDate date = QDate::fromString(ui->lineEdit_date->text(), "yyyy-MM-dd");
+    QDate date = QDate::fromString(ui->dateEdit_date->text(), "dd-MM-yyyy");
 
     bool test = etmp.update(id, nom, prenom, poste, salaire, date);
     if (test) {
@@ -217,43 +192,41 @@ void MainWindow::on_pushButton_exporterPDF_clicked() {
         int yPos = 100;
 
         QSqlQueryModel *model = etmp.afficher();
+
+        // Loop through the rows of the model and export each row to the PDF
         for (int row = 0; row < model->rowCount(); ++row) {
-            QString line;
+            int xPos = 100;  // Start x-position for the first column
+
+            // Loop through the columns for each row to add spacing
             for (int col = 0; col < model->columnCount(); ++col) {
-                line += model->data(model->index(row, col)).toString() + " ";
+                QString cellData = model->data(model->index(row, col)).toString();
+
+                // Draw each column with 600 units of horizontal space between them
+                painter.drawText(xPos, yPos, cellData);
+                xPos += 900;  // Increase x-position for the next column
             }
-            painter.drawText(100, yPos, line);
-            yPos += 20;
+
+            // Increase y-position for the next row with 300 units of vertical space
+            yPos += 300;
+
+            // If the content exceeds the page height, create a new page
+            if (yPos > pdfWriter.height() - 50) {
+                pdfWriter.newPage();
+                yPos = 100; // Reset y-position for the new page
+            }
         }
+
+        // End the PDF drawing
+        painter.end();
 
         QMessageBox::information(this, "Exporter PDF", "PDF exporté avec succès.");
     }
 }
 
-void MainWindow::on_pushButton_chrono_clicked() {
-    if (chronoTimer->isActive()) {
-        // Si le chronomètre est déjà actif, on l'arrête (fin de pause)
-        chronoPauseDuration += chronoStartTime.msecsTo(QTime::currentTime());  // Ajouter le temps de la pause
-        chronoTimer->stop();  // Arrêter le chronomètre
-        breakEndTime = QTime::currentTime();  // Enregistrer la fin de la pause
-        updatePause();  // Mettre à jour l'affichage du temps de pause
-    } else {
-        // Si le chronomètre est inactif, on démarre la pause
-        breakStartTime = QTime::currentTime();  // Enregistrer le début de la pause
-        chronoStartTime = breakStartTime;  // Redémarrer le chronomètre
-        chronoTimer->start(1000);  // Démarrer le chronomètre de pause avec une mise à jour toutes les secondes
-    }
-}
 
 
 
 
-void MainWindow::updatePause() {
-    // Temps écoulé depuis le début de la pause
-    int elapsedTime = breakStartTime.msecsTo(QTime::currentTime()) + pauseDuration;
-    QTime elapsedTimeFormatted = QTime::fromMSecsSinceStartOfDay(elapsedTime); // Formater le temps écoulé
-    ui->lcdNumber_chrono->display(elapsedTimeFormatted.toString("hh:mm:ss")); // Afficher le temps formaté sur lcdNumber
-}
 
 
 void MainWindow::updateHistorique(const QString &action, const QString &details) {
@@ -273,53 +246,15 @@ void MainWindow::updateHistorique(const QString &action, const QString &details)
     historiqueModel->appendRow({actionItem, detailsItem, dateItem});
 }
 
-void MainWindow::on_pushButton_commencer_clicked() {
-    startTime = QTime::currentTime();
-    ui->label_heureTravail->setText("Heure de début : " + startTime.toString("hh:mm:ss"));
-}
 
 
 
 
-void MainWindow::on_pushButton_finJournee_clicked() {
-    endTime = QTime::currentTime();
-    int totalWorkedTime = startTime.msecsTo(endTime) - pauseDuration; // Temps total travaillé - Durée de la pause
-    ui->label_heureTravail->setText("Temps travaillé : " + QTime(0, 0).addMSecs(totalWorkedTime).toString("hh:mm:ss"));
-}
 
-void MainWindow::updateChrono() {
-    int elapsedTime = chronoStartTime.msecsTo(QTime::currentTime()) + chronoPauseDuration;  // Temps écoulé en millisecondes
-    QTime elapsedTimeFormatted = QTime::fromMSecsSinceStartOfDay(elapsedTime); // Formater le temps écoulé
-    ui->lcdNumber_chrono->display(elapsedTimeFormatted.toString("hh:mm:ss")); // Afficher le temps formaté sur lcdNumber
-}
 
-void MainWindow::toggleTimer()
-{
-    if (isTimerRunning) {
-        // Si le timer est déjà en cours, on l'arrête
-        chronoTimer->stop();
-    } else {
-        // Sinon, on démarre le timer
-        chronoTimer->start(1000); // Le timer se déclenche toutes les secondes
-    }
 
-    // Alterner l'état du chronomètre
-    isTimerRunning = !isTimerRunning;
-}
 
-void MainWindow::updateTimer()
-{
-    // Incrémenter le temps écoulé
-    timeElapsed++;
 
-    // Calculer les minutes et secondes
-    int minutes = timeElapsed / 60;
-    int seconds = timeElapsed % 60;
-
-    // Afficher le temps sur le LCD
-    QString timeString = QString::asprintf("%02d:%02d", minutes, seconds);
-    ui->lcdNumber_chrono->display(timeString);
-}
 
 void MainWindow::on_pushButton_statistiques_salaire_clicked() {
     QMap<QString, int> stats = etmp.statistiquesParSalaire();
@@ -386,3 +321,176 @@ void MainWindow::on_pushButton_sauvegarder_clicked() {
         }
     }
 }
+
+
+void MainWindow::initialiserTableView() {
+    tableModel = new QStandardItemModel(this);
+    tableModel->setColumnCount(3);
+    tableModel->setHorizontalHeaderLabels({"ID", "Début Journée", "Fin Journée"});
+    ui->tableView_pointage->setModel(tableModel);
+}
+
+
+
+void MainWindow::on_pushButton_commencer_clicked()
+{
+    if (ui->lineEdit_ID->text().isEmpty()) {
+        QMessageBox::warning(this, "Erreur", "Veuillez entrer un ID.");
+        return;
+    }
+
+    int id = ui->lineEdit_ID->text().toInt();
+    QString debutJournee = QTime::currentTime().toString("HH:mm:ss");
+
+    // Vérifier si l'ID existe dans la base de données
+    if (!employeObj.idExiste(id)) {
+        QMessageBox::critical(this, "Erreur", "L'ID n'existe pas dans la base de données des employés.");
+        return;
+    }
+
+    if (!employeObj.ajouterPointage(id, debutJournee, "")) {
+        QMessageBox::critical(this, "Erreur", "Échec de l'ajout du pointage.");
+    } else {
+        afficherPointage();
+        QMessageBox::information(this, "Pointage", "Début de journée enregistré pour l'ID " + QString::number(id));
+    }
+}
+
+
+
+void MainWindow::on_pushButton_finJournee_clicked()
+{
+    if (ui->lineEdit_ID->text().isEmpty()) {
+        QMessageBox::warning(this, "Erreur", "Veuillez entrer un ID.");
+        return;
+    }
+
+    int id = ui->lineEdit_ID->text().toInt(); // Utiliser l'ID saisi
+    QString finJournee = QTime::currentTime().toString("HH:mm:ss");
+
+    // Vérifier si l'ID existe déjà dans le tableau des pointages
+    bool updated = false;
+    for (QVector<QString>& ligne : employeObj.pointageTable) { // Assurez-vous que `pointageTable` est accessible ici
+        if (ligne[0] == QString::number(id)) {
+            ligne[2] = finJournee; // Mettre à jour l'heure de fin
+            updated = true;
+            break;
+        }
+    }
+
+    if (!updated) {
+        QMessageBox::critical(this, "Erreur", "L'ID n'existe pas dans les pointages.");
+    } else {
+        afficherPointage();
+        QMessageBox::information(this, "Pointage", "Fin de journée enregistrée pour l'ID " + QString::number(id));
+    }
+}
+
+
+
+
+void MainWindow::afficherPointage()
+{
+    tableModel->clear();
+    tableModel->setHorizontalHeaderLabels({"ID", "Début Journée", "Fin Journée"});
+
+    QVector<QVector<QString>> pointage = employeObj.getPointage();
+    for (const QVector<QString>& ligne : pointage) {
+        int id = ligne[0].toInt();
+
+        // Vérifier si l'ID existe dans la base de données
+        if (!employeObj.idExiste(id)) {
+            continue; // Ignorer les IDs non valides
+        }
+
+        QList<QStandardItem*> row;
+        for (const QString& value : ligne) {
+            row.append(new QStandardItem(value));
+        }
+        tableModel->appendRow(row);
+    }
+}
+
+
+void MainWindow::on_pushButton_enregistrer_clicked() {
+    // Let the user choose a file path for saving the PDF
+    QString filePath = QFileDialog::getSaveFileName(nullptr, "Save PDF", "", "PDF Files (*.pdf)");
+
+    if (!filePath.isEmpty()) {
+        bool success = exporterPointagePDF(filePath);
+
+        if (success) {
+            qDebug() << "PDF export successful!";
+        } else {
+            qDebug() << "PDF export failed!";
+        }
+    }
+}
+bool MainWindow::exporterPointagePDF(const QString& filePath) {
+    // Create a QPdfWriter instance to generate the PDF
+    QPdfWriter writer(filePath);
+    QPainter painter(&writer);
+
+    if (!painter.isActive()) {
+        qDebug() << "Failed to initialize QPainter!";
+        return false;
+    }
+
+    // Set font for the PDF
+    painter.setFont(QFont("Arial", 12)); // Set a larger font for readability
+
+    // Y-position for drawing data
+    int yPosition = 100;  // Start from the top of the page
+    int xPositionID = 100;  // Start for ID column
+    int xPositionDebut = xPositionID + 1000;  // Space between columns (1000 = 300 + 700)
+    int xPositionFin = xPositionDebut + 1000;  // Space between columns (1000 = 300 + 700)
+
+    // Draw the header row with the same spacing
+    painter.drawText(xPositionID, yPosition, "ID");  // ID Header
+    painter.drawText(xPositionDebut, yPosition, "D.J");  // DEBUT JOURNEE Header
+    painter.drawText(xPositionFin, yPosition, "F.J");  // FIN JOURNEE Header
+
+    // Increase y-position to leave space between the header and data rows
+    yPosition += 300;  // Increased vertical space between rows
+
+    // Loop through the rows of the model and export each row to the PDF
+    int rowCount = ui->tableView_pointage->model()->rowCount();
+    for (int row = 0; row < rowCount; ++row) {
+        QModelIndex indexID = ui->tableView_pointage->model()->index(row, 0);  // ID column
+        QModelIndex indexDebut = ui->tableView_pointage->model()->index(row, 1);  // DEBUT JOURNEE column
+        QModelIndex indexFin = ui->tableView_pointage->model()->index(row, 2);  // FIN JOURNEE column
+
+        QString id = ui->tableView_pointage->model()->data(indexID).toString();
+        QString debutJournee = ui->tableView_pointage->model()->data(indexDebut).toString();
+        QString finJournee = ui->tableView_pointage->model()->data(indexFin).toString();
+
+        // Draw each row of data with added horizontal and vertical spacing
+        painter.drawText(xPositionID, yPosition, id);  // ID
+        painter.drawText(xPositionDebut, yPosition, debutJournee);  // DEBUT JOURNEE
+        painter.drawText(xPositionFin, yPosition, finJournee);  // FIN JOURNEE
+
+        // Increase y-position to move to the next line with more space between rows
+        yPosition += 300;  // Increased vertical space between rows
+
+        // If the yPosition exceeds the page height, create a new page
+        if (yPosition > writer.height() - 50) {
+            writer.newPage();
+            yPosition = 100; // Reset yPosition for the new page
+        }
+    }
+
+    // End the PDF drawing
+    painter.end();
+
+    return true;  // Indicate success
+}
+void MainWindow::on_pushButton_employe_clicked() {
+    // Make sure the current window (if it's any other window) is hidden
+    this->show();  // Show the MainWindow again (if it was hidden)
+}
+//For example, if you have a different window, make sure to hide it before bringing MainWindow back:
+//void SomeOtherWindow::on_pushButton_something_clicked() {
+//MainWindow *mainWindow = new MainWindow();  // Or use the existing instance
+//mainWindow->show();  // Show the MainWindow
+//this->hide();  // Hide the current window (e.g., SomeOtherWindow)
+//}

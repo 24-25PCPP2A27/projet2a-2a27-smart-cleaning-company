@@ -43,14 +43,9 @@ private slots:
        void on_pushButton_exporterPDF_clicked();
 
     // Chronomètre
-       void on_pushButton_chrono_clicked();  // Bouton pour démarrer/arrêter
-       void updateChrono();  // Mise à jour du temps
     void updateHistorique(const QString &action, const QString &details);
     void on_pushButton_commencer_clicked();  // Fonction pour commencer le travail
        void on_pushButton_finJournee_clicked(); // Fonction pour marquer la fin de la journée
-       void updatePause();
-       void toggleTimer();
-         void updateTimer();
          void on_pushButton_statistiques_salaire_clicked();
 
         void on_pushButton_sauvegarder_clicked();
@@ -59,9 +54,7 @@ private:
     Ui::MainWindow *ui;
     employe etmp;
     // Chronomètre
-    QTimer *chronoTimer;
-      int timeElapsed; // Temps écoulé en secondes
-     bool isTimerRunning;
+employe* employeInstance;
     QList<HistoriqueAction> historiqueList;  // Liste pour l'historique
         QStandardItemModel *historiqueModel;     // Modèle pour l'historique
         QTime startTime;  // Heure de début de travail
@@ -73,8 +66,16 @@ private:
               // Le timer pour le chronomètre
     QTime chronoStartTime;              // Temps de démarrage du chronomètre
     int chronoPauseDuration;           // Durée accumulée des pauses
-    QSerialPort *arduino;    // Port série pour l'Arduino
-    QString arduinoPortName; // Nom du port série
+    int current_id = -1;
+    employe employeObj;
+    QStandardItemModel *tableModel;
+
+       void initialiserTableView(); // Méthode pour configurer la table
+       void mettreAJourPointage(int id, const QString& finJournee);
+    void afficherPointage();
+     bool exporterPointagePDF(const QString& filePath);
+     void on_pushButton_enregistrer_clicked();  // Slot for the button click
+     void on_pushButton_employe_clicked();  // Declare the slot for the button click
 
 };
 #endif // MAINWINDOW_H

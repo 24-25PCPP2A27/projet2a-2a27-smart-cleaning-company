@@ -5,6 +5,7 @@
 #include<QSqlQueryModel>
 #include <QDate>
 #include <QMap>
+#include "arduino.h"  // Ajoutez cette ligne pour inclure la classe Arduino
 
 
 class employe
@@ -13,7 +14,8 @@ class employe
     int id;
     int salaire;
     QDate date_embauche;
-
+     Arduino* arduino;
+     static int compteurAjouts; // Compteur global pour gérer le buzzer
 public:
     employe(){};
     employe(int id,QString nom,QString prenom ,QString poste ,int salaire ,QDate date_embauche);
@@ -44,6 +46,20 @@ public:
        QMap<QString, int> statistiquesParPoste();
        QSqlQueryModel* rechercher(QString searchKey);
        QSqlQueryModel* trierParSalaire();
+       bool ajouterPointage(int id, const QString& debutJournee, const QString& finJournee);
+           QVector<QVector<QString>> getPointage() const;
+           bool idExiste(int id); // Vérifie si un ID existe dans la base de données
+           QVector<QVector<QString>> getPointageTable() const; // Accès à pointageTable
+               QVector<QVector<QString>>& getPointageTableRef();         // Getters et setters
+
+        void verifierEtActiverBuzzer(); // Méthode pour gérer le buzzer
+
+
+        employe(Arduino* arduinoInstance): arduino(arduinoInstance){}
+        QVector<QVector<QString>> pointageTable; // Tableau des pointages
+          bool exporterPointagePDF(const QString& cheminFichier);
+          QVector<QVector<QString>> getPointageData(); // Add this method to your class
+     void on_pushButton_enregistrer_clicked();
 };
 
 #endif // EMPLOYE_H
