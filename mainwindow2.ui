@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow2</class>
+ <widget class="QMainWindow" name="MainWindow2">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1716</width>
+    <height>892</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>-14</x>
+      <y>-7</y>
+      <width>1731</width>
+      <height>851</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/img/backgroundIMG/Untitled design (2).png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="updateButton">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>400</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Update</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="exporterButton">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>400</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>export PDF</string>
+    </property>
+   </widget>
+   <widget class="QTableWidget" name="tableWidget">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>10</y>
+      <width>611</width>
+      <height>371</height>
+     </rect>
+    </property>
+    <column>
+     <property name="text">
+      <string>id</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>nom</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>prix</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>quantite</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>categorie</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>date</string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QPushButton" name="sortByIdButton">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>400</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>sort</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_navigate">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>390</y>
+      <width>281</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton {
+    background-color: rgb(173, 216, 230); /* Bleu clair */
+    color: rgb(255, 255, 255);  /* Texte blanc */
+    border: 2px solid rgb(70, 130, 180); /* Bordure bleu foncé */
+    border-radius: 20px; 
+    padding: 10px; 
+    transition: background-color 0.3s, color 0.3s, border 0.3s;
+}
+
+QPushButton:hover {
+    background-color: rgb(240, 248, 255); /* Bleu très clair (presque blanc) pour le survol */
+    color: black;  /* Texte noir lors du survol */
+    border: 4px solid rgb(70, 130, 180); /* Bordure bleu foncé sur survol */
+    outline: none; 
+}</string>
+    </property>
+    <property name="text">
+     <string>PRODUIT</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="checkStockButton">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>400</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>check</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_back">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>320</y>
+      <width>281</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton {
+    background-color: rgb(173, 216, 230); /* Bleu clair */
+    color: rgb(255, 255, 255);  /* Texte blanc */
+    border: 2px solid rgb(70, 130, 180); /* Bordure bleu foncé */
+    border-radius: 20px; 
+    padding: 10px; 
+    transition: background-color 0.3s, color 0.3s, border 0.3s;
+}
+
+QPushButton:hover {
+    background-color: rgb(240, 248, 255); /* Bleu très clair (presque blanc) pour le survol */
+    color: black;  /* Texte noir lors du survol */
+    border: 4px solid rgb(70, 130, 180); /* Bordure bleu foncé sur survol */
+    outline: none; 
+}</string>
+    </property>
+    <property name="text">
+     <string>EMPLOYE</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="exportToCSVButton">
+    <property name="geometry">
+     <rect>
+      <x>810</x>
+      <y>400</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>export Excel</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="quantiteLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>1280</x>
+      <y>650</y>
+      <width>223</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="categorieLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>1280</x>
+      <y>680</y>
+      <width>223</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_ajouter">
+    <property name="geometry">
+     <rect>
+      <x>1270</x>
+      <y>740</y>
+      <width>223</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>add</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="quantitLabel">
+    <property name="geometry">
+     <rect>
+      <x>1220</x>
+      <y>650</y>
+      <width>40</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>quantité</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="prixLabel">
+    <property name="geometry">
+     <rect>
+      <x>1230</x>
+      <y>620</y>
+      <width>18</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>prix</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="idLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>1280</x>
+      <y>560</y>
+      <width>223</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="iDProduitLabel">
+    <property name="geometry">
+     <rect>
+      <x>1220</x>
+      <y>560</y>
+      <width>50</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ID produit</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="nomLabel">
+    <property name="geometry">
+     <rect>
+      <x>1230</x>
+      <y>590</y>
+      <width>23</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Nom</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="categorieLabel">
+    <property name="geometry">
+     <rect>
+      <x>1220</x>
+      <y>680</y>
+      <width>45</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>categorie</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="dateLabel">
+    <property name="geometry">
+     <rect>
+      <x>1230</x>
+      <y>710</y>
+      <width>22</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>date</string>
+    </property>
+   </widget>
+   <widget class="QDateEdit" name="dateEdit">
+    <property name="geometry">
+     <rect>
+      <x>1280</x>
+      <y>710</y>
+      <width>223</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="nomLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>1280</x>
+      <y>590</y>
+      <width>223</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="prixLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>1280</x>
+      <y>620</y>
+      <width>223</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QTableView" name="tableView">
+    <property name="geometry">
+     <rect>
+      <x>990</x>
+      <y>20</y>
+      <width>691</width>
+      <height>261</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="searchLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>1060</x>
+      <y>300</y>
+      <width>241</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_2">
+    <property name="geometry">
+     <rect>
+      <x>1470</x>
+      <y>340</y>
+      <width>131</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>delete</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>1000</x>
+      <y>270</y>
+      <width>51</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;id produit&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit">
+    <property name="geometry">
+     <rect>
+      <x>1420</x>
+      <y>300</y>
+      <width>241</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>1350</x>
+      <y>270</y>
+      <width>51</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;id produit&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="searchButton">
+    <property name="geometry">
+     <rect>
+      <x>1100</x>
+      <y>340</y>
+      <width>131</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>search</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_showStats">
+    <property name="geometry">
+     <rect>
+      <x>650</x>
+      <y>780</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>stats</string>
+    </property>
+   </widget>
+   <widget class="QFrame" name="frame_chart">
+    <property name="geometry">
+     <rect>
+      <x>390</x>
+      <y>520</y>
+      <width>621</width>
+      <height>231</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1716</width>
+     <height>26</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

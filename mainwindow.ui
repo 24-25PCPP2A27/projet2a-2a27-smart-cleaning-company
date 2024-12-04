@@ -623,7 +623,7 @@ QPushButton:hover {
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>330</y>
+      <y>320</y>
       <width>281</width>
       <height>51</height>
      </rect>
@@ -702,6 +702,36 @@ QPushButton:hover {
      </rect>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButton_navigate">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>390</y>
+      <width>281</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton {
+    background-color: rgb(173, 216, 230); /* Bleu clair */
+    color: rgb(255, 255, 255);  /* Texte blanc */
+    border: 2px solid rgb(70, 130, 180); /* Bordure bleu foncé */
+    border-radius: 20px; 
+    padding: 10px; 
+    transition: background-color 0.3s, color 0.3s, border 0.3s;
+}
+
+QPushButton:hover {
+    background-color: rgb(240, 248, 255); /* Bleu très clair (presque blanc) pour le survol */
+    color: black;  /* Texte noir lors du survol */
+    border: 4px solid rgb(70, 130, 180); /* Bordure bleu foncé sur survol */
+    outline: none; 
+}</string>
+    </property>
+    <property name="text">
+     <string>PRODUIT</string>
+    </property>
+   </widget>
    <zorder>label</zorder>
    <zorder>lineEdit_ID</zorder>
    <zorder>lineEdit_nom</zorder>
@@ -736,6 +766,7 @@ QPushButton:hover {
    <zorder>tableView_pointage</zorder>
    <zorder>pushButton_enregistrer</zorder>
    <zorder>dateEdit_date</zorder>
+   <zorder>pushButton_navigate</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

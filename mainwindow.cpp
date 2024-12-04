@@ -1,3 +1,4 @@
+#include "mainwindow2.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QMessageBox>
@@ -449,6 +450,12 @@ bool MainWindow::exporterPointagePDF(const QString& filePath) {
 }
 void MainWindow::on_pushButton_employe_clicked() {
     this->show();  // Show the MainWindow again (if it was hidden)
+}
+
+void MainWindow::on_pushButton_navigate_clicked() {
+    MainWindow2 *window2 = new MainWindow2(this); // Create the second window
+    window2->show();                             // Show the second window
+    this->hide();                                // Hide the current window (optional)
 }
 //For example, if you have a different window, make sure to hide it before bringing MainWindow back:
 //void SomeOtherWindow::on_pushButton_something_clicked() {

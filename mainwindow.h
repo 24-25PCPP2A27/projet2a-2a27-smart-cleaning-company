@@ -49,6 +49,7 @@ private slots:
          void on_pushButton_statistiques_salaire_clicked();
 
         void on_pushButton_sauvegarder_clicked();
+        void on_pushButton_navigate_clicked();
 
 private:
     Ui::MainWindow *ui;

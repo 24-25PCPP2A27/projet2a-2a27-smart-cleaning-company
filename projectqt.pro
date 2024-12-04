@@ -1,4 +1,4 @@
-QT       += sql
+QT       += sql printsupport
 QT += charts
 QT += core gui serialport
 
@@ -19,19 +19,28 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     arduino.cpp \
+    barchartwidget.cpp \
     connection.cpp \
     employe.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    mainwindow2.cpp \
+    produit.cpp \
+    serialcommunication.cpp
 
 HEADERS += \
     arduino.h \
+    barchartwidget.h \
     connection.h \
     employe.h \
-    mainwindow.h
+    mainwindow.h \
+    mainwindow2.h \
+    produit.h \
+    serialcommunication.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    mainwindow2.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
