@@ -19,7 +19,9 @@
 #include <QSqlError>
 #include <QSerialPort>
 #include <QDebug>
-
+#include <QVBoxLayout>
+#include <QPalette>
+#include <QPixmap>
 
 
 
@@ -30,6 +32,15 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     afficher(); // Load products on startup
+
+    // Set background image using CSS
+    QString styleSheet = "MainWindow {"
+                         "background-image: url(C:/New folder/bg3.png);"
+                         "background-repeat: no-repeat;"
+                         "background-position: center;"
+                         "background-size: cover;"
+                         "}";
+    this->setStyleSheet(styleSheet);
 
     // Open the serial port
     serial->setPortName("COM5");  // Set the port name (adjust COM5 if needed)
@@ -380,10 +391,8 @@ void MainWindow::on_pushButton_showStats_clicked() {
     // Add the new chart widget to the layout
     layout->addWidget(chartWidget);
     chartWidget->show();
-
-    // Switch to the "Statistics" tab
-    ui->tabWidget->setCurrentWidget(ui->tab_5);  // Adjust the tab name accordingly
 }
+
 
 void MainWindow::on_checkStockButton_clicked() {
     // Make sure the database is open
