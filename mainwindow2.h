@@ -34,6 +34,8 @@ private slots:
   void on_checkStockButton_clicked();
   void initSerialPort();
   void handleArduinoSignal(int boutonId);
+  void on_pb_commande_clicked() ;
+
 
 
 private:

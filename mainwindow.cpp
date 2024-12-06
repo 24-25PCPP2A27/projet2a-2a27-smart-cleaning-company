@@ -24,6 +24,8 @@
 #include <QSerialPort>    // Pour la communication série
 #include <QSerialPortInfo> // Pour trouver les ports série disponibles
 #include "mainwindoww3.h" // Inclure la classe pour mainwindoww3
+#include "lacommande.h"
+
 
 
 using namespace QtCharts;
@@ -470,6 +472,11 @@ void MainWindow::on_serviceButton_clicked()
 
     // Masquer la fenêtre actuelle (MainWindow)
     this->hide();
+}
+void MainWindow::on_pb_commande_clicked() {
+    lacommande *com = new lacommande(this); // Create the second window
+    com->show();                             // Show the second window
+    this->hide();                                // Hide the current window (optional)
 }
 
 //For example, if you have a different window, make sure to hide it before bringing MainWindow back:

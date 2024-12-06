@@ -27,6 +27,8 @@
 #include "mainwindoww3.h"
 #include "mainwindow2.h"  // Inclure la classe pour mainwindow2
 #include "mainwindoww3.h" // Inclure la classe pour mainwindoww3
+#include "lacommande.h"
+
 
 
 
@@ -342,6 +344,11 @@ void MainWindoww3::scheduleService() {
 void MainWindoww3::showConfirmationMessage(const QString &message) {
     // Affiche le message dans la zone de texte prévue
     ui->confirmationMessage->setPlainText(message);
+}
+void MainWindoww3::on_pb_commande_clicked() {
+    lacommande *com = new lacommande(this); // Create the second window
+    com->show();                             // Show the second window
+    this->hide();                                // Hide the current window (optional)
 }
 
 

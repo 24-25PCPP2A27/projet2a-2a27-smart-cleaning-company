@@ -51,6 +51,7 @@ private slots:
         void on_pushButton_sauvegarder_clicked();
         void on_pushButton_navigate_clicked();
         void on_serviceButton_clicked();
+        void on_pb_commande_clicked() ;
 
 private:
     Ui::MainWindow *ui;

@@ -32,6 +32,8 @@ private slots:
     void on_convertirButton_clicked();
     void on_serviceButton_clicked();
     void scheduleService();
+    void on_pb_commande_clicked() ;
+
 
 
 private:

@@ -3,7 +3,13 @@ QT += charts
 QT += core gui serialport
 QT += network
 QT += core gui sql printsupport
-
+QT       += core gui sql charts
+QT += charts
+QT += core gui sql charts printsupport
+QT += printsupport
+QT += serialport
+QT += widgets
+QT += core gui serialport sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -22,9 +28,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     arduino.cpp \
+    arduinoo.cpp \
     barchartwidget.cpp \
+    commande.cpp \
     connection.cpp \
     employe.cpp \
+    lacommande.cpp \
     main.cpp \
     mainwindow.cpp \
     mainwindow2.cpp \
@@ -35,9 +44,13 @@ SOURCES += \
 
 HEADERS += \
     arduino.h \
+    arduino.h \
+    arduinoo.h \
     barchartwidget.h \
+    commande.h \
     connection.h \
     employe.h \
+    lacommande.h \
     mainwindow.h \
     mainwindow2.h \
     mainwindoww3.h \
@@ -45,6 +58,7 @@ HEADERS += \
     serialcommunication.h \
     services.h
 FORMS += \
+    lacommande.ui \
     mainwindow.ui \
     mainwindow2.ui \
     mainwindoww3.ui  # Assurez-vous que mainwindoww3.ui est bien mentionné ici

@@ -764,6 +764,36 @@ QPushButton:hover {
      </rect>
     </property>
    </widget>
+   <widget class="QPushButton" name="pb_commande">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>530</y>
+      <width>281</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton {
+    background-color: rgb(173, 216, 230); /* Bleu clair */
+    color: rgb(255, 255, 255);  /* Texte blanc */
+    border: 2px solid rgb(70, 130, 180); /* Bordure bleu foncé */
+    border-radius: 20px; 
+    padding: 10px; 
+    transition: background-color 0.3s, color 0.3s, border 0.3s;
+}
+
+QPushButton:hover {
+    background-color: rgb(240, 248, 255); /* Bleu très clair (presque blanc) pour le survol */
+    color: black;  /* Texte noir lors du survol */
+    border: 4px solid rgb(70, 130, 180); /* Bordure bleu foncé sur survol */
+    outline: none; 
+}</string>
+    </property>
+    <property name="text">
+     <string>COMMANDE</string>
+    </property>
+   </widget>
    <zorder>label</zorder>
    <zorder>idEdit</zorder>
    <zorder>nomEdit</zorder>
@@ -801,6 +831,7 @@ QPushButton:hover {
    <zorder>serviceDateTime</zorder>
    <zorder>scheduleServiceButton</zorder>
    <zorder>confirmationMessage</zorder>
+   <zorder>pb_commande</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -808,7 +839,7 @@ QPushButton:hover {
      <x>0</x>
      <y>0</y>
      <width>1711</width>
-     <height>26</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

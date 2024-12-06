@@ -24,6 +24,8 @@
 #include <QPixmap>
 #include <QSerialPort>
 #include <QSerialPortInfo>
+#include "lacommande.h"
+
 
 MainWindow2::MainWindow2(QWidget *parent) :
     QMainWindow(parent),
@@ -67,6 +69,11 @@ void MainWindow2::on_pushButton_back_clicked() {
 }
 void MainWindow2::on_pushButton_employe_clicked() {
     this->show();  // Show the MainWindow again (if it was hidden)
+}
+void MainWindow2::on_pb_commande_clicked() {
+    lacommande *com = new lacommande(this); // Create the second window
+    com->show();                             // Show the second window
+    this->hide();                                // Hide the current window (optional)
 }
 
 void MainWindow2::on_pushButton_showStats_clicked() {
