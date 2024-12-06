@@ -6,6 +6,13 @@
 #include "produit.h"
 #include <QSerialPort>
 #include <QSerialPortInfo>
+#include <QMessageBox>
+#include <QSqlQuery>
+#include <QTimer>
+#include <QLineEdit>
+#include <QInputDialog>
+#include <QPushButton>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -31,6 +38,11 @@ private slots:
     void on_checkStockButton_clicked();
     void onCheckButtonClicked();
     void initSerialPort();
+    void checkStockLevels();
+    void onProductUpdated();
+    void onModifyButtonClicked();
+    void findAndModifyProduct(int productId);
+    void updateProductInDatabase(int productId, const QString &newName, const QString &newCategory, int newQuantity, double newPrice);
 
 
 
@@ -40,7 +52,10 @@ private:
     QSqlQueryModel *model;                // Model for displaying products
     QSerialPort *serial;
 
-    void afficher();                      // Load products into the model
+    void afficher();
+    void showRestockAlert(const QString& productName);
+
+    QPushButton *modifyButton;  // Modify button to trigger stock update
 };
 
 #endif // MAINWINDOW_H

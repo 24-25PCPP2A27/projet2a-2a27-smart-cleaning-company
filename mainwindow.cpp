@@ -22,16 +22,19 @@
 #include <QVBoxLayout>
 #include <QPalette>
 #include <QPixmap>
-
+#include <QLineEdit>
 
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow),
       serial(new QSerialPort(this))
+
 {
     ui->setupUi(this);
     afficher(); // Load products on startup
+    connect(ui->ModifyButton, &QPushButton::clicked, this, &MainWindow::onModifyButtonClicked);
+
 
     // Set background image using CSS
     QString styleSheet = "MainWindow {"
@@ -41,6 +44,14 @@ MainWindow::MainWindow(QWidget *parent)
                          "background-size: cover;"
                          "}";
     this->setStyleSheet(styleSheet);
+
+
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &MainWindow::checkStockLevels);
+    timer->start(30000);  // Trigger every 10 minutes
+
+    // Automatically check stock when the app starts
+    checkStockLevels();
 
     // Open the serial port
     serial->setPortName("COM5");  // Set the port name (adjust COM5 if needed)
@@ -473,5 +484,143 @@ void MainWindow::onCheckButtonClicked() {
     // Check products and activate vibrator if necessary
     serialComm.checkProductAndActivateVibrator();
 }
+
+void MainWindow::checkStockLevels()
+{
+    QSqlQuery query;
+    query.exec("SELECT nom , quantite FROM produit");  // Adjust this query for your database
+
+    while (query.next()) {
+        QString productName = query.value(0).toString();
+        int quantity = query.value(1).toInt();
+
+        // Check if stock is less than 8 or 20% threshold
+        if (quantity < 8 || quantity < 0.2 * 100) {  // Assuming 100 is the max stock
+            showRestockAlert(productName);
+        }
+    }
+}
+
+void MainWindow::showRestockAlert(const QString& productName)
+{
+    QMessageBox::warning(this, "Restock Alert", "Stock is low for " + productName + ". Please restock!");
+}
+
+void MainWindow::onProductUpdated()
+{
+    // This function is optional if you want to trigger stock checks after updating product data
+    checkStockLevels();
+}
+void MainWindow::updateProductInDatabase(int productId, const QString &newName, const QString &newCategory, int newQuantity, double newPrice)
+{
+    // Prepare the SQL update query to update the product
+    QSqlQuery query;
+    query.prepare("UPDATE produit SET nom = :nom, categorie = :categorie, quantite = :quantite, prix = :prix WHERE id_produit = :id");
+    query.bindValue(":nom", newName);
+    query.bindValue(":categorie", newCategory);
+    query.bindValue(":quantite", newQuantity);
+    query.bindValue(":prix", newPrice);
+    query.bindValue(":id", productId);
+
+    // Execute the query to update the product
+    if (query.exec()) {
+        QMessageBox::information(this, "Success", "Product details updated successfully.");
+    } else {
+        QMessageBox::warning(this, "Error", "Failed to update product details.");
+    }
+}
+
+
+
+void MainWindow::onModifyButtonClicked()
+{
+    bool ok;
+
+    // Get the product ID from the QLineEdit (idLineEdit) as QString
+    QString productIdText = ui->idLineEdit->text();
+
+    // Convert the QString to an integer
+    int productId = productIdText.toInt(&ok);
+
+    // Check if the conversion was successful and the ID is a valid number
+    if (!ok || productId <= 0) {
+        QMessageBox::warning(this, "Invalid ID", "Please enter a valid product ID.");
+        return;
+    }
+    qDebug() << "Product ID entered: " << productIdText;
+
+
+    // Get the current details for the product from the database
+    QSqlQuery query;
+    query.prepare("SELECT nom, categorie, quantite, prix FROM produit WHERE id_produit = :id");
+    query.bindValue(":id", productId);
+
+    if (query.exec() && query.next()) {
+        // Retrieve the current details from the database
+        QString currentName = query.value(0).toString();
+        QString currentCategory = query.value(1).toString();
+        int currentQuantity = query.value(2).toInt();
+        double currentPrice = query.value(3).toDouble();
+
+        // Ask the user for the new details using QInputDialog
+        QString newName = QInputDialog::getText(this, "Modify Name", "Enter New Name:", QLineEdit::Normal, currentName, &ok);
+        if (!ok || newName.isEmpty()) return;
+
+        QString newCategory = QInputDialog::getText(this, "Modify Category", "Enter New Category:", QLineEdit::Normal, currentCategory, &ok);
+        if (!ok || newCategory.isEmpty()) return;
+
+        int newQuantity = QInputDialog::getInt(this, "Modify Quantity", "Enter New Quantity:", currentQuantity, 0, 10000, 1, &ok);
+        if (!ok) return;
+
+        double newPrice = QInputDialog::getDouble(this, "Modify Price", "Enter New Price:", currentPrice, 0, 10000, 2, &ok);
+        if (!ok) return;
+
+        // Update the product details in the database
+        updateProductInDatabase(productId, newName, newCategory, newQuantity, newPrice);
+    } else {
+        // Show a warning if the product ID was not found
+        QMessageBox::warning(this, "Product Not Found", "Product ID not found in the database.");
+    }
+}
+
+
+void MainWindow::findAndModifyProduct(int productId)
+{
+    bool ok;
+
+    // Fetch the current product details from the database
+    QSqlQuery query;
+    query.prepare("SELECT nom, categorie, quantite, prix FROM produit WHERE id_produit = :id");
+    query.bindValue(":id", productId);
+
+    if (query.exec() && query.next()) {
+        // Extract the current product details from the query result
+        QString currentName = query.value(0).toString();
+        QString currentCategory = query.value(1).toString();
+        int currentQuantity = query.value(2).toInt();
+        double currentPrice = query.value(3).toDouble();
+
+        // Ask the user for the new details
+        QString newName = QInputDialog::getText(this, "Modify Name", "Enter New Name:", QLineEdit::Normal, currentName, &ok);
+        if (!ok || newName.isEmpty()) return;
+
+        QString newCategory = QInputDialog::getText(this, "Modify Category", "Enter New Category:", QLineEdit::Normal, currentCategory, &ok);
+        if (!ok || newCategory.isEmpty()) return;
+
+        int newQuantity = QInputDialog::getInt(this, "Modify Quantity", "Enter New Quantity:", currentQuantity, 0, 10000, 1, &ok);
+        if (!ok) return;
+
+        double newPrice = QInputDialog::getDouble(this, "Modify Price", "Enter New Price:", currentPrice, 0, 10000, 2, &ok);
+        if (!ok) return;
+
+        // Update the product in the database
+        updateProductInDatabase(productId, newName, newCategory, newQuantity, newPrice);
+    } else {
+        QMessageBox::warning(this, "Product Not Found", "Product ID not found in the database.");
+    }
+}
+
+
+
 
 

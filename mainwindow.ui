@@ -390,6 +390,19 @@
      <string>date</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="ModifyButton">
+    <property name="geometry">
+     <rect>
+      <x>1380</x>
+      <y>740</y>
+      <width>223</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>modify</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
