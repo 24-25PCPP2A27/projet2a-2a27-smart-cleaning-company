@@ -33,13 +33,11 @@ private slots:
   void on_exportToCSVButton_clicked();
   void on_checkStockButton_clicked();
   void initSerialPort();
-  void handleArduinoSignal(int boutonId);
 
 
 private:
     Ui::MainWindow2 *ui;
      QSerialPort* serial;
-     void resetAllQuantities();
 
 
 };

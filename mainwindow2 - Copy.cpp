@@ -476,29 +476,3 @@ void MainWindow2::initSerialPort() {
         qDebug() << "Serial port opened successfully!";
     }
 }
-void MainWindow2::handleArduinoSignal(int boutonId) {
-    qDebug() << "Signal reçu pour le bouton : " << boutonId;
-
-    if (boutonId == 1) {
-        qDebug() << "Mise à jour de la quantité de tous les produits à 0";
-        resetAllQuantities();  // Réinitialiser toutes les quantités à 0
-    } else if (boutonId == 2) {
-        // Affiche "commencer" dans la barre d'état pour le bouton 2
-        qDebug() << "commencer"; // Affiche "commencer" dans la console Qt
-    }
-}
-
-// Fonction pour réinitialiser toutes les quantités des produits à 0
-void MainWindow2::resetAllQuantities() {
-    qDebug() << "Réinitialisation des quantités de tous les produits à 0";
-
-    QSqlQuery query;
-    query.prepare("UPDATE PRODUIT SET QUANTITE = 0");  // La requête pour mettre la quantité à 0 pour tous les produits
-
-    if (query.exec()) {
-        qDebug() << "Toutes les quantités ont été réinitialisées à 0.";
-    } else {
-        qDebug() << "Erreur lors de la réinitialisation des quantités : " << query.lastError().text();
-    }
-}
-

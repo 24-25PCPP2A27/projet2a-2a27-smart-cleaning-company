@@ -23,8 +23,6 @@
 #include <QPieSeries>
 #include <QSerialPort>    // Pour la communication série
 #include <QSerialPortInfo> // Pour trouver les ports série disponibles
-#include "mainwindoww3.h" // Inclure la classe pour mainwindoww3
-
 
 using namespace QtCharts;
 
@@ -48,9 +46,6 @@ MainWindow::MainWindow(QWidget *parent)
         connect(ui->pushButton_exporterPDF, &QPushButton::clicked, this, &MainWindow::on_pushButton_exporterPDF_clicked); // Connecter le bouton d'export PDF
         connect(ui->pushButton_enregistrer, &QPushButton::clicked, this, &MainWindow::on_pushButton_enregistrer_clicked);
         connect(ui->pushButton_employe, &QPushButton::clicked, this, &MainWindow::on_pushButton_employe_clicked);
-        connect(ui->serviceButton, &QPushButton::clicked, this, &MainWindow::on_serviceButton_clicked);
-
-
 
 
 
@@ -462,16 +457,6 @@ void MainWindow::on_pushButton_navigate_clicked() {
     window2->show();                             // Show the second window
     this->hide();                                // Hide the current window (optional)
 }
-void MainWindow::on_serviceButton_clicked()
-{
-    // Créer une nouvelle instance de MainWindoww3
-    MainWindoww3 *window3 = new MainWindoww3(this);
-    window3->show();  // Afficher la nouvelle fenêtre
-
-    // Masquer la fenêtre actuelle (MainWindow)
-    this->hide();
-}
-
 //For example, if you have a different window, make sure to hide it before bringing MainWindow back:
 //void SomeOtherWindow::on_pushButton_something_clicked() {
 //MainWindow *mainWindow = new MainWindow();  // Or use the existing instance

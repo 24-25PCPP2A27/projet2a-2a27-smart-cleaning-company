@@ -166,4 +166,3 @@ QMap<QString, int> Produit::getCategorieStats() {
 
     return stats;
 }
-

@@ -3,12 +3,13 @@
 connection::connection(){}
 
 bool connection::createconnection(){
-    bool test=false;
     db = QSqlDatabase::addDatabase("QODBC");
-    db.setDatabaseName("CPP_Project");
-    db.setUserName("souha");
-    db.setPassword("oracle");
+    bool test=false;
+    db.setDatabaseName("Source_Projet2A");
+    db.setUserName("aziz");
+    db.setPassword("Oracle");
     if (db.open()) test=true;
     return test;
 }
 
+void connection::closeconnection(){db.close();}

@@ -1,16 +1,21 @@
 #include "serialcommunication.h"
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QSerialPort>
+#include <QSerialPortInfo>
+#include <QDebug>
 
-SerialCommunication::SerialCommunication() {
-    // Constructor can be used for any initialization if needed
+SerialCommunication::SerialCommunication(QObject *parent) : QObject(parent) {
+    // Connecte le signal readyRead pour gérer les données entrantes
+
 }
 
 SerialCommunication::~SerialCommunication() {
-    // Destructor to clean up resources
     disconnectFromArduino();
 }
 
 void SerialCommunication::connectToArduino() {
-    serialPort.setPortName("COM5");  // Change to your correct COM port
+    serialPort.setPortName("COM5");  // Remplacez par votre port correct
     serialPort.setBaudRate(QSerialPort::Baud9600);
     serialPort.setDataBits(QSerialPort::Data8);
     serialPort.setParity(QSerialPort::NoParity);
@@ -24,20 +29,24 @@ void SerialCommunication::connectToArduino() {
     }
 }
 
+void SerialCommunication::disconnectFromArduino() {
+    if (serialPort.isOpen()) {
+        serialPort.close();
+        qDebug() << "Disconnected from Arduino";
+    }
+}
+
 void SerialCommunication::checkProductAndActivateVibrator() {
     QSqlQuery query;
     query.prepare("SELECT id, quantity FROM PRODUIT WHERE quantity = 0");
     if (query.exec()) {
         while (query.next()) {
             int productId = query.value(0).toInt();
-            int quantity = query.value(1).toInt();
 
-            if (quantity == 0) {
-                // Send a signal to Arduino to activate the vibrator
-                if (serialPort.isOpen()) {
-                    serialPort.write("1");  // Send '1' to turn on the vibrator
-                    qDebug() << "Vibrator activated for product ID: " << productId;
-                }
+            // Si le port série est ouvert, envoyer un signal à l'Arduino
+            if (serialPort.isOpen()) {
+                serialPort.write("1");  // Envoyer '1' pour activer le vibreur
+                qDebug() << "Vibrator activated for product ID: " << productId;
             }
         }
     } else {
@@ -45,9 +54,18 @@ void SerialCommunication::checkProductAndActivateVibrator() {
     }
 }
 
-void SerialCommunication::disconnectFromArduino() {
-    if (serialPort.isOpen()) {
-        serialPort.close();
-        qDebug() << "Disconnected from Arduino";
+void SerialCommunication::readData() {
+    QByteArray data = serialPort.readAll();
+    QString message = QString::fromUtf8(data).trimmed();
+
+    qDebug() << "Data received from Arduino:" << message;
+
+    // Exemple de traitement des messages
+    if (message.contains("Button1")) {
+        emit buttonPressed(1);
+    } else if (message.contains("Button2")) {
+        emit buttonPressed(2);
     }
 }
+
+
